@@ -28,6 +28,7 @@ contract MyToken is owned {
 	uint256 public totalSupply;
 	uint256 public sellPrice;
 	uint256 public buyPrice;
+	uint minBalanceForAccounts;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event FrozenFunds(address target, bool frozen);
@@ -83,17 +84,13 @@ contract MyToken is owned {
 		return revenue;                                   // ends function and returns
 	}
 
-	// function transfer(address _to, uint256 _value) {
-	// 	// Check if sender has balance and for overflows
-	// 	require(balanceOf[msg.sender] >= _value && balanceOf[_to] + _value >= balanceOf[_to]);
+	function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+		minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+	}
 
-	// 	// Add and subtract new balances
-	// 	balanceOf[msg.sender] -= _value;
-	// 	balanceOf[_to] += _value;
-
-	// 	// Notify anyone listening that this transfer took place
-	// 	Transfer(msg.sender, _to, _value);
-	// }
+	function transfer(address _to, uint256 _value) {
+		_transfer(msg.sender, _to, _value);
+  }
 
 	function _transfer(address _from, address _to, uint _value) internal {
     require(_to != 0x0);                                // Prevent transfer to 0x0 address. Use burn() instead
@@ -101,8 +98,16 @@ contract MyToken is owned {
     require(balanceOf[_to] + _value >= balanceOf[_to]); // Check for overflows
     require(!frozenAccount[_from]);                     // Check if sender is frozen
     require(!frozenAccount[_to]);                       // Check if recipient is frozen
+
+		if (_from.balance < minBalanceForAccounts)
+			sell((minBalanceForAccounts - _from.balance) / sellPrice);
+
+    if (_to.balance < minBalanceForAccounts)
+			_to.send(sell((minBalanceForAccounts - _to.balance) / sellPrice));
+
     balanceOf[_from] -= _value;                         // Subtract from the sender
     balanceOf[_to] += _value;                           // Add the same to the recipient
+    
     Transfer(_from, _to, _value);
 	}
 }
