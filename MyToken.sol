@@ -1,20 +1,20 @@
 pragma solidity ^0.4.15;
 
 contract owned {
-  address public owner;
+	address public owner;
 
-  function owned() {
-    owner = msg.sender;
-  }
+	function owned() {
+		owner = msg.sender;
+	}
 
-  modifier onlyOwner {
-    require(msg.sender == owner);
-    _;
-  }
+	modifier onlyOwner {
+		require(msg.sender == owner);
+		_;
+	}
 
-  function transferOwnership(address newOwner) onlyOwner {
-    owner = newOwner;
-  }
+	function transferOwnership(address newOwner) onlyOwner {
+		owner = newOwner;
+	}
 }
 
 contract MyToken is owned {
@@ -38,18 +38,18 @@ contract MyToken is owned {
 
 	function MyToken(
 		uint256 initialSupply,
-    string tokenName,
-    uint8 decimalUnits,
-    string tokenSymbol,
-    address centralMinter
+		string tokenName,
+		uint8 decimalUnits,
+		string tokenSymbol,
+		address centralMinter
 	) {
 		if (centralMinter != 0) owner = centralMinter;
 		totalSupply = initialSupply;
-    balanceOf[msg.sender] = initialSupply;    // Give the creator all initial tokens
-    name = tokenName;                         // Set the name for display purposes
-    symbol = tokenSymbol;                     // Set the symbol for display purposes
-    decimals = decimalUnits;                  // Amount of decimals for display purposes
-    timeOfLastProof = now;
+		balanceOf[msg.sender] = initialSupply;    // Give the creator all initial tokens
+		name = tokenName;                         // Set the name for display purposes
+		symbol = tokenSymbol;                     // Set the symbol for display purposes
+		decimals = decimalUnits;                  // Amount of decimals for display purposes
+		timeOfLastProof = now;
 	}
 
 	function mintToken(address target, uint256 mintedAmount) onlyOwner {
@@ -112,23 +112,23 @@ contract MyToken is owned {
 
 	function transfer(address _to, uint256 _value) {
 		_transfer(msg.sender, _to, _value);
-  }
+	}
 
 	function _transfer(address _from, address _to, uint _value) internal {
-    require(_to != 0x0);                                // Prevent transfer to 0x0 address. Use burn() instead
-    require(balanceOf[_from] >= _value);                // Check if the sender has enough
-    require(balanceOf[_to] + _value >= balanceOf[_to]); // Check for overflows
-    require(!frozenAccount[_from]);                     // Check if sender is frozen
-    require(!frozenAccount[_to]);                       // Check if recipient is frozen
+		require(_to != 0x0);                                // Prevent transfer to 0x0 address. Use burn() instead
+		require(balanceOf[_from] >= _value);                // Check if the sender has enough
+		require(balanceOf[_to] + _value >= balanceOf[_to]); // Check for overflows
+		require(!frozenAccount[_from]);                     // Check if sender is frozen
+		require(!frozenAccount[_to]);                       // Check if recipient is frozen
 
 		if (_from.balance < minBalanceForAccounts)
 			sell((minBalanceForAccounts - _from.balance) / sellPrice);
 
-    if (_to.balance < minBalanceForAccounts)
-			_to.send(sell((minBalanceForAccounts - _to.balance) / sellPrice));
+		if (_to.balance < minBalanceForAccounts)
+			_to.transfer(sell((minBalanceForAccounts - _to.balance) / sellPrice));
 
-    balanceOf[_from] -= _value;                         // Subtract from the sender
-    balanceOf[_to] += _value;                           // Add the same to the recipient
-    Transfer(_from, _to, _value);
+		balanceOf[_from] -= _value;                         // Subtract from the sender
+		balanceOf[_to] += _value;                           // Add the same to the recipient
+		Transfer(_from, _to, _value);
 	}
 }
