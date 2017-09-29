@@ -20,6 +20,7 @@ contract owned {
 contract MyToken is owned {
 	// This creates an array with all balances
 	mapping (address => uint256) public balanceOf;
+	mapping (address => bool) public frozenAccount;
 
 	string public name;
 	string public symbol;
@@ -27,6 +28,7 @@ contract MyToken is owned {
 	uint256 public totalSupply;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
+	event FrozenFunds(address target, bool frozen);
 
 	function MyToken(
 		uint256 initialSupply,
@@ -50,6 +52,11 @@ contract MyToken is owned {
 		Transfer(owner, target, mintedAmount);
 	}
 
+	function freezeAccount(address target, bool freeze) onlyOwner {
+		frozenAccount[target] = freeze;
+		FrozenFunds(target, freeze);
+	}
+
 	// function transfer(address _to, uint256 _value) {
 	// 	// Check if sender has balance and for overflows
 	// 	require(balanceOf[msg.sender] >= _value && balanceOf[_to] + _value >= balanceOf[_to]);
@@ -64,8 +71,8 @@ contract MyToken is owned {
 
 	function _transfer(address _from, address _to, uint _value) internal {
     require(_to != 0x0);                                // Prevent transfer to 0x0 address. Use burn() instead
-    require(balanceOf[_from] >= _value);                 // Check if the sender has enough
-    require(balanceOf[_to] + _value >= balanceOf[_to]);  // Check for overflows
+    require(balanceOf[_from] >= _value);                // Check if the sender has enough
+    require(balanceOf[_to] + _value >= balanceOf[_to]); // Check for overflows
     require(!frozenAccount[_from]);                     // Check if sender is frozen
     require(!frozenAccount[_to]);                       // Check if recipient is frozen
     balanceOf[_from] -= _value;                         // Subtract from the sender
