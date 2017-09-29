@@ -15,23 +15,23 @@ We are going to create a digital token. Tokens in the ethereum ecosystem can rep
 ## Screenshots
 
 ##### Code Contract
-![code contract](./screenshots/code contract.png)
+![code contract](screenshots/code contract.png)
 
 ##### Deploy Contract
-![deploy contract](./screenshots/deploy contract.png)
+![deploy contract](screenshots/deploy contract.png)
 
 ##### Main Account Balance
-![main balance](./screenshots/main balance.png)
+![main balance](screenshots/main balance.png)
 
 ##### My Token Admin Page
-![my token admin page](./screenshots/my token admin page.png)
+![my token admin page](screenshots/my token admin page.png)
 
 ##### Send Token to friend
-![send token](./screenshots/send token.png)
-![confirm transaction](./screenshots/confirm transaction.png)
+![send token](screenshots/send token.png)
+![confirm transaction](screenshots/confirm transaction.png)
 
 ##### Transaction Logs
-![transaction logs](./screenshots/transaction logs.png)
+![transaction logs](screenshots/transaction logs.png)
 
 ---
 
