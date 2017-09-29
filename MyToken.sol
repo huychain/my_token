@@ -1,6 +1,23 @@
 pragma solidity ^0.4.15;
 
-contract MyToken {
+contract owned {
+  address public owner;
+
+  function owned() {
+    owner = msg.sender;
+  }
+
+  modifier onlyOwner {
+    require(msg.sender == owner);
+    _;
+  }
+
+  function transferOwnership(address newOwner) onlyOwner {
+    owner = newOwner;
+  }
+}
+
+contract MyToken is owned {
 	// This creates an array with all balances
 	mapping (address => uint256) public balanceOf;
 
@@ -10,12 +27,19 @@ contract MyToken {
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 
-	function MyToken(uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits) {
+	function MyToken(
+		uint256 initialSupply,
+    string tokenName,
+    uint8 decimalUnits,
+    string tokenSymbol,
+    address centralMinter
+	) {
+		if (centralMinter != 0) owner = centralMinter;
     balanceOf[msg.sender] = initialSupply;    // Give the creator all initial tokens
     name = tokenName;                         // Set the name for display purposes
     symbol = tokenSymbol;                     // Set the symbol for display purposes
     decimals = decimalUnits;                  // Amount of decimals for display purposes
-	}
+	} 
 
 	// function transfer(address _to, uint256 _value) {
 	// 	// Check if sender has balance and for overflows
