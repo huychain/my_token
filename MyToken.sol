@@ -24,6 +24,7 @@ contract MyToken is owned {
 	string public name;
 	string public symbol;
 	uint8 public decimals;
+	uint256 public totalSupply;
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -35,11 +36,19 @@ contract MyToken is owned {
     address centralMinter
 	) {
 		if (centralMinter != 0) owner = centralMinter;
+		totalSupply = initialSupply;
     balanceOf[msg.sender] = initialSupply;    // Give the creator all initial tokens
     name = tokenName;                         // Set the name for display purposes
     symbol = tokenSymbol;                     // Set the symbol for display purposes
     decimals = decimalUnits;                  // Amount of decimals for display purposes
-	} 
+	}
+
+	function mintToken(address target, uint256 mintedAmount) onlyOwner {
+		balanceOf[target] += mintedAmount;
+		totalSupply += mintedAmount;
+		Transfer(0, owner, mintedAmount);
+		Transfer(owner, target, mintedAmount);
+	}
 
 	// function transfer(address _to, uint256 _value) {
 	// 	// Check if sender has balance and for overflows
