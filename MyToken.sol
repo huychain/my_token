@@ -29,6 +29,9 @@ contract MyToken is owned {
 	uint256 public sellPrice;
 	uint256 public buyPrice;
 	uint minBalanceForAccounts;
+	bytes32 public currentChallenge;                         // The coin starts with a challenge
+	uint public timeOfLastProof;                             // Variable to keep track of when rewards were given
+	uint public difficulty = 10**32;                         // Difficulty starts reasonably low
 
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event FrozenFunds(address target, bool frozen);
@@ -46,6 +49,7 @@ contract MyToken is owned {
     name = tokenName;                         // Set the name for display purposes
     symbol = tokenSymbol;                     // Set the symbol for display purposes
     decimals = decimalUnits;                  // Amount of decimals for display purposes
+    timeOfLastProof = now;
 	}
 
 	function mintToken(address target, uint256 mintedAmount) onlyOwner {
@@ -88,6 +92,24 @@ contract MyToken is owned {
 		minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
 	}
 
+	function giveBlockReward() {
+		balanceOf[block.coinbase] += 1;
+	}
+
+	function proofOfWork(uint nonce){
+		bytes8 n = bytes8(sha3(nonce, currentChallenge));    // Generate a random hash based on input
+		require(n >= bytes8(difficulty));                   // Check if it's under the difficulty
+
+		uint timeSinceLastProof = (now - timeOfLastProof);  // Calculate time since last reward was given
+		require(timeSinceLastProof >=  5 seconds);         // Rewards cannot be given too quickly
+		balanceOf[msg.sender] += timeSinceLastProof / 60 seconds;  // The reward to the winner grows by the minute
+
+		difficulty = difficulty * 10 minutes / timeSinceLastProof + 1;  // Adjusts the difficulty
+
+		timeOfLastProof = now;                              // Reset the counter
+		currentChallenge = sha3(nonce, currentChallenge, block.blockhash(block.number - 1));  // Save a hash that will be used as the next proof
+	}
+
 	function transfer(address _to, uint256 _value) {
 		_transfer(msg.sender, _to, _value);
   }
@@ -107,7 +129,6 @@ contract MyToken is owned {
 
     balanceOf[_from] -= _value;                         // Subtract from the sender
     balanceOf[_to] += _value;                           // Add the same to the recipient
-    
     Transfer(_from, _to, _value);
 	}
 }
